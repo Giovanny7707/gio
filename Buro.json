@@ -1,0 +1,700 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This Service verifies the credit information with credit bureau",
+    "version": "1.1.0",
+    "title": "CNSV-CBU-D-CreditBureau"
+  },
+  "host": "localhost:8080",
+  "basePath": "/api",
+  "schemes": [
+    "https"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/consumer-services/credit-bureau/score": {
+      "post": {
+        "tags": [
+          "retrieve-credit-bureau-score"
+        ],
+        "operationId": "retrieve-credit-bureau-score",
+        "summary": "credit bureau query",
+        "description": "This API is used to fetch client's credit information from Bureau Service. The scope is public, pre-login, and entry-point",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "client_id",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Client ID generated during application registration"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "The Authorization Token received during login"
+          },
+          {
+            "name": "Accept",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Content-Types that are acceptable for the response"
+          },
+          {
+            "name": "uuid",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "128 bit UUID that you generate for every request"
+          },
+          {
+            "name": "Accept-Language",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "description": "List of acceptable human languages for response"
+          },
+          {
+            "name": "Content-Type",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Content-Types that are sent in the request"
+          },
+          {
+            "name": "countryCode",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Country code in 2 character ISO 3166 format"
+          },
+          {
+            "name": "businesscode",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Business code identified durin application registration"
+          },
+          {
+            "name": "ChannelId",
+            "in": "header",
+            "required": true,
+            "type": "string",
+            "description": "Channel where request originated"
+          },
+          {
+            "name": "sid",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "description": "Session is generated and returned on the first API call of the key exchange (GET e2e call) as response header, which needs to be resent on succesive calls of same session."
+          },
+          {
+            "in": "body",
+            "name": "creditBureauRequest",
+            "description": "Credit Bureau Request",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreditBureauRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/CreditBureauResponse"
+            }
+          },
+          "400": {
+            "description": "<table><table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>invalidRequest</td><td>Missing or invalid Parameters</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "<table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>unAuthorized</td><td>Authorization credentials are missing or invalid</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "<table><tr><td>Type</td><td>Code</td><td>Details</td><td>More Info</td></tr><tr><td>error</td><td>accessNotConfigured</td><td>The request operation is not configured to access this resource</td><td>Channel/Country/Business provided in the request is not supported currently</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "<table><tr><td>Type</td><td>Code</td><td>Details</td><td>More Info</td></tr><tr><td>error</td><td>resourceNotFound</td><td>The requested resource was not found</td><td>Empty resource/resource not found</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "422": {
+            "description": "<table><table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>error</td><td>businessValidationFailed</td><td>Business validation error occured on one or more parameters</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "<table><tr><td>Type</td><td>Code</td><td>Details</td></tr><tr><td>fatal</td><td>serverUnavailable</td><td>The request failed due to an internal error/server unavailability</td></tr></table>",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Address": {
+      "description": "Address",
+      "properties": {
+        "addressType": {
+          "description": "Type of Address",
+          "type": "string",
+          "example": "HOME",
+          "enum": [
+            "HOME",
+            "BUSINESS"
+          ]
+        },
+        "buildingNumber": {
+          "description": "Building Number",
+          "example": "123",
+          "type": "string"
+        },
+        "city": {
+          "description": "City of Address ",
+          "example": "New York",
+          "type": "string"
+        },
+        "colony": {
+          "description": "Colony of the person ",
+          "example": "Merced Gomez",
+          "type": "string"
+        },
+        "countryCode": {
+          "description": "Country Code of Address Example=MX Required=True",
+          "example": "MX",
+          "type": "string",
+          "enum": [
+            "AD",
+            "AE",
+            "AF",
+            "AG",
+            "AI",
+            "AL",
+            "AM",
+            "AO",
+            "AQ",
+            "AR",
+            "AS",
+            "AT",
+            "AU",
+            "AW",
+            "AX",
+            "AZ",
+            "BA",
+            "BB",
+            "BD",
+            "BE",
+            "BF",
+            "BG",
+            "BH",
+            "BI",
+            "BJ",
+            "BL",
+            "BM",
+            "BN",
+            "BO",
+            "BQ",
+            "BR",
+            "BS",
+            "BT",
+            "BV",
+            "BW",
+            "BY",
+            "BZ",
+            "CA",
+            "CC",
+            "CD",
+            "CF",
+            "CG",
+            "CH",
+            "CI",
+            "CK",
+            "CL",
+            "CM",
+            "CN",
+            "CO",
+            "CR",
+            "CU",
+            "CV",
+            "CW",
+            "CX",
+            "CY",
+            "CZ",
+            "DE",
+            "DJ",
+            "DK",
+            "DM",
+            "DO",
+            "DZ",
+            "EC",
+            "EE",
+            "EG",
+            "EH",
+            "ER",
+            "ES",
+            "ET",
+            "FI",
+            "FJ",
+            "FK",
+            "FM",
+            "FO",
+            "FR",
+            "GA",
+            "GB",
+            "GD",
+            "GE",
+            "GF",
+            "GG",
+            "GH",
+            "GI",
+            "GL",
+            "GM",
+            "GN",
+            "GP",
+            "GQ",
+            "GR",
+            "GS",
+            "GT",
+            "GU",
+            "GW",
+            "GY",
+            "HK",
+            "HM",
+            "HN",
+            "HR",
+            "HT",
+            "HU",
+            "ID",
+            "IE",
+            "IL",
+            "IM",
+            "IN",
+            "IO",
+            "IQ",
+            "IR",
+            "IS",
+            "IT",
+            "JE",
+            "JM",
+            "JO",
+            "JP",
+            "KE",
+            "KG",
+            "KH",
+            "KI",
+            "KM",
+            "KN",
+            "KP",
+            "KR",
+            "KW",
+            "KY",
+            "KZ",
+            "LA",
+            "LB",
+            "LC",
+            "LI",
+            "LK",
+            "LR",
+            "LS",
+            "LT",
+            "LU",
+            "LV",
+            "LY",
+            "MA",
+            "MC",
+            "MD",
+            "ME",
+            "MF",
+            "MG",
+            "MH",
+            "MK",
+            "ML",
+            "MM",
+            "MN",
+            "MO",
+            "MP",
+            "MQ",
+            "MR",
+            "MS",
+            "MT",
+            "MU",
+            "MV",
+            "MW",
+            "MX",
+            "MY",
+            "MZ",
+            "NA",
+            "NC",
+            "NE",
+            "NF",
+            "NG",
+            "NI",
+            "NL",
+            "NO",
+            "NP",
+            "NR",
+            "NU",
+            "NZ",
+            "OM",
+            "PA",
+            "PE",
+            "PF",
+            "PG",
+            "PH",
+            "PK",
+            "PL",
+            "PM",
+            "PN",
+            "PR",
+            "PS",
+            "PT",
+            "PW",
+            "PY",
+            "QA",
+            "RE",
+            "RO",
+            "RS",
+            "RU",
+            "RW",
+            "SA",
+            "SB",
+            "SC",
+            "SD",
+            "SE",
+            "SG",
+            "SH",
+            "SI",
+            "SJ",
+            "SK",
+            "SL",
+            "SM",
+            "SN",
+            "SO",
+            "SR",
+            "SS",
+            "ST",
+            "SV",
+            "SX",
+            "SY",
+            "SZ",
+            "TC",
+            "TD",
+            "TF",
+            "TG",
+            "TH",
+            "TJ",
+            "TK",
+            "TL",
+            "TM",
+            "TN",
+            "TO",
+            "TR",
+            "TT",
+            "TV",
+            "TW",
+            "TZ",
+            "UA",
+            "UG",
+            "UM",
+            "US",
+            "UY",
+            "UZ",
+            "VA",
+            "VC",
+            "VE",
+            "VG",
+            "VI",
+            "VN",
+            "VU",
+            "WF",
+            "WS",
+            "YE",
+            "YT",
+            "ZA",
+            "ZM",
+            "ZW"
+          ]
+        },
+        "municipality": {
+          "description": "municipality/county",
+          "example": "Obregon",
+          "type": "string"
+        },
+        "postalCode": {
+          "description": "PostalCode of Address ",
+          "example": "01500",
+          "type": "string"
+        },
+        "residencyMonths": {
+          "format": "int32",
+          "description": "residing since years",
+          "example": "5",
+          "type": "integer"
+        },
+        "residencyStatus": {
+          "description": "Type of residence (Owned/Rent)",
+          "example": "OWNED",
+          "type": "string",
+          "enum": [
+            "OWN",
+            "RENTED"
+          ]
+        },
+        "state": {
+          "description": "State of Address ",
+          "example": "NY",
+          "type": "string"
+        },
+        "streetName": {
+          "description": "Street Number",
+          "example": "Main Street",
+          "type": "string"
+        },
+        "unitNumber": {
+          "description": "Apartment/Suite Number (internalNumber)",
+          "example": "100",
+          "type": "string"
+        }
+      },
+      "required": [
+        "buildingNumber",
+        "municipality",
+        "postalCode",
+        "state",
+        "streetName",
+        "unitNumber"
+      ]
+    },
+    "Applicant": {
+      "description": "Client's personal information",
+      "properties": {
+        "fullName": {
+          "description": "name",
+          "example": "Satya",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "paternal surname",
+          "example": "Kumar",
+          "type": "string"
+        },
+        "motherLastName": {
+          "description": "maternal surname",
+          "example": "Kumar",
+          "type": "string"
+        },
+        "taxId": {
+          "description": "complete RFC (federal taxpayer registration id)",
+          "example": "SEMV801224",
+          "type": "string"
+        },
+        "address": {
+          "description": "",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Address"
+          }
+        },
+        "creditBureau": {
+          "$ref": "#/definitions/CreditBureau"
+        },
+        "phone": {
+          "description": "",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Phone"
+          }
+        }
+      },
+      "required": [
+        "address",
+        "creditBureau",
+        "fullName",
+        "lastName",
+        "motherLastName",
+        "phone",
+        "taxId"
+      ]
+    },
+    "CreditBureauRequest": {
+      "description": "Bureau service request",
+      "properties": {
+        "applicant": {
+          "$ref": "#/definitions/Applicant"
+        }
+      },
+      "required": [
+        "applicant"
+      ]
+    },
+    "CreditBureau": {
+      "description": "Basic information about the client's credit history.",
+      "properties": {
+        "carLoanFlag": {
+          "description": "Boolean value indicating if the client has a car loan ",
+          "example": "1",
+          "type": "boolean"
+        },
+        "creditCardFlag": {
+          "description": "Boolean value indicating if the client has a credit card loan",
+          "example": "1",
+          "type": "boolean"
+        },
+        "creditCardNumber": {
+          "description": "Credit card number",
+          "example": "23523423523523",
+          "type": "string"
+        },
+        "mortageLoanFlag": {
+          "description": "Boolean value indicating if the client has a mortage loan",
+          "example": "1",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "mortageLoanFlag",
+        "creditCardNumber",
+        "creditCardFlag",
+        "carLoanFlag"
+      ]
+    },
+    "CreditBureauResponse": {
+      "description": "Bureau service response",
+      "properties": {
+        "authenticationRejectionCode": {
+          "description": "Short error message indicating the error type",
+          "example": "3001",
+          "type": "string"
+        },
+        "authenticationRejectionReason": {
+          "description": "Long message explaining the error type",
+          "example": "VALIDATION ERROR: Something went wrong!",
+          "type": "string"
+        },
+        "customerCreditBureauIndicator": {
+          "description": "Client's credit score coming from the Bureau backend. ",
+          "example": "1",
+          "type": "string"
+        },
+        "requestNumber": {
+          "description": "Contains a number that identifies the request call in the back end system. Used for auditing purposes.",
+          "example": "1505786887009",
+          "type": "string"
+        },
+        "responseCode": {
+          "description": "Contains a number that identifies the status of the request call from the back end system. Used for auditing purposes.",
+          "example": "0",
+          "type": "string"
+        },
+        "status": {
+          "description": "Used to indicate the status of the call to the back end service. It holds 84 if the back end authenticated the user (id the data was found in the back end) or holds an 85 if the  user data was not found in the back end. It may also contain  specific back end status codes (like 3004)",
+          "example": "84",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authenticationRejectionCode",
+        "authenticationRejectionReason",
+        "customerCreditBureauIndicator",
+        "requestNumber",
+        "responseCode",
+        "status"
+      ]
+    },
+    "Phone": {
+      "description": "Phone",
+      "properties": {
+        "carrierName": {
+          "description": "Carrier Name",
+          "type": "string",
+          "example": "Nextel"
+        },
+        "extensionNumber": {
+          "description": "extension number of phone",
+          "example": "4567",
+          "type": "string"
+        },
+        "fullPhoneNumber": {
+          "description": "Full Phone Number",
+          "example": "1234533535",
+          "type": "string"
+        },
+        "phoneType": {
+          "description": "Type of Phone",
+          "example": "CELL",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fullPhoneNumber"
+      ]
+    },
+    "ErrorResponse": {
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Invalid - Request did not confirm to the specification and was unprocessed and rejected. Please fix the value and try again",
+          "enum": [
+            "error",
+            "warn",
+            "invalid",
+            "fatal"
+          ]
+        },
+        "code": {
+          "description": "Error code which qualifies the error",
+          "type": "string"
+        },
+        "details": {
+          "description": "Human readable explanation specific to the occurrence of the problem",
+          "type": "string"
+        },
+        "location": {
+          "description": "The name of the field that resulted in the error",
+          "type": "string"
+        },
+        "moreInfo": {
+          "description": "More Info can be used to pass any additional details",
+          "type": "string"
+        },
+        "uuid": {
+          "description": "128 bit UUID that you generate for every request",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp of the error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "code"
+      ]
+    }
+  }
+}
